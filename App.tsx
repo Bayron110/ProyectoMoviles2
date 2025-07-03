@@ -1,12 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import NavegadorPrincipal from './navigation/MainNavigation';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Hola Contra</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavegadorPrincipal/>
+
   );
 }
 
@@ -17,4 +16,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  txt:{
+    fontSize: 30
+  }
 });
