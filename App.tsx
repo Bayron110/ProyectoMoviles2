@@ -5,6 +5,7 @@ import NavegadorPrincipal from './navigation/MainNavigation';
 export default function App() {
   return (
     <NavegadorPrincipal/>
+
   );
 }
 
