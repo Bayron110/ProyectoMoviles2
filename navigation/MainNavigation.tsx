@@ -4,9 +4,6 @@ import HomeScreens from "../Screens/HomeScreens";
 import IniciaeScreens from "../Screens/IniciaeScreens";
 import RegistroScreens from "../Screens/RegistroScreens";
 
-//COMPONENTES
-
-
 
 const Stack =  createStackNavigator()
 
