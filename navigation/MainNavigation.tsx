@@ -8,9 +8,6 @@ import Chevrolet from "../Screens/VentanaRepuestos/Chevrolet";
 import Toyota from "../Screens/VentanaRepuestos/Toyota";
 import Huandawi from "../Screens/VentanaRepuestos/Huandawi";
 
-//COMPONENTES
-
-
 
 const Stack =  createStackNavigator()
 
