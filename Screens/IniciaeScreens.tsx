@@ -1,7 +1,6 @@
-import { Alert, Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useState } from 'react'
+import { Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
 
-export default function IniciaeScreens() {
+export default function IniciaeScreens({ navigation }: any) {
  
 
     
@@ -14,7 +13,7 @@ export default function IniciaeScreens() {
             blurRadius={3}
         >
             <View style={styles.overlay}>
-                <Text style={styles.title}>Repuestos Vehiculares</Text>
+                <Text style={styles.title}>Iniciar Sesión</Text>
                 <TextInput
                     placeholder="Correo electrónico"
                     placeholderTextColor="#ddd"
@@ -26,7 +25,8 @@ export default function IniciaeScreens() {
                     secureTextEntry
                     style={styles.input}
                 />
-                <Button title="Iniciar sesión" color="#FF6600" />
+                <Button title="Iniciar sesión" onPress={()=>navigation.navigate("VentanaP")} color="#FF6600" />
+                <Button title="Registrase" onPress={()=>navigation.navigate("Registro")} color="#2ae5c2" />
             </View>
         </ImageBackground>
     );
