@@ -2,8 +2,8 @@ import { StyleSheet, Text, TouchableOpacity, View, ImageBackground, Image, Scrol
 import React from 'react'
 
 export default function HomeScreens({ navigation }: any) {
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
 
             <Text style={styles.companyTitle}>Autoplus Repuestos</Text>
 
