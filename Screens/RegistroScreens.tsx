@@ -22,8 +22,6 @@ export default function RegistroScreens({ navigation }: any) {
         Telefono: Telefono,
         dirreccion: dirreccion,
         contrasena: contrasena
-
-
       })
       
   }

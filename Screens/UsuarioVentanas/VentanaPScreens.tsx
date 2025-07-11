@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
-import { useNavigation } from '@react-navigation/native'
 
 export default function VentanaPScreens({ navigation }: any) {
 
