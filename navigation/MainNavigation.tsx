@@ -7,6 +7,8 @@ import VentanaPScreens from "../Screens/UsuarioVentanas/VentanaPScreens";
 import Chevrolet from "../Screens/VentanaRepuestos/Chevrolet";
 import Toyota from "../Screens/VentanaRepuestos/Toyota";
 import Huandawi from "../Screens/VentanaRepuestos/Huandawi";
+import FacturaScreens from "../Screens/UsuarioVentanas/FacturaScreens";
+import CarritoScreens from "../Screens/UsuarioVentanas/CarritoScreens";
 
 
 const Stack =  createStackNavigator()
@@ -21,6 +23,8 @@ function MyStack() {
             <Stack.Screen name="Chevrolet" component={Chevrolet}/>
             <Stack.Screen name="Toyota" component={Toyota}/>
             <Stack.Screen name="Huandawi" component={Huandawi}/>
+            <Stack.Screen name="Detalle" component={FacturaScreens}/>
+            <Stack.Screen name="Carrito" component={CarritoScreens}/>
         </Stack.Navigator>
     )
 }
