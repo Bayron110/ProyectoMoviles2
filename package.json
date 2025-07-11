@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~5.0.4",
     "@react-navigation/native": "^7.1.14",
     "@react-navigation/stack": "^7.4.2",
     "@supabase/supabase-js": "^2.50.3",
@@ -16,19 +17,18 @@
     "expo-status-bar": "~2.2.3",
     "firebase": "^11.10.0",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.79.4",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-dom": "19.0.0",
-    "react-native-web": "^0.20.0",
-    "@expo/metro-runtime": "~5.0.4"
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
     "typescript": "~5.8.3",
-    "vite": "^7.0.2"
+    "vite": "^7.0.4"
   },
   "private": true
 }
