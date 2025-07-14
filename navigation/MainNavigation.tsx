@@ -9,6 +9,8 @@ import Toyota from "../Screens/VentanaRepuestos/Toyota";
 import Huandawi from "../Screens/VentanaRepuestos/Huandawi";
 import FacturaScreens from "../Screens/UsuarioVentanas/FacturaScreens";
 import CarritoScreens from "../Screens/UsuarioVentanas/CarritoScreens";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import PerfilScreens from "../Screens/UsuarioVentanas/PerfilScreens";
 
 
 const Stack =  createStackNavigator()
@@ -25,7 +27,18 @@ function MyStack() {
             <Stack.Screen name="Huandawi" component={Huandawi}/>
             <Stack.Screen name="Detalle" component={FacturaScreens}/>
             <Stack.Screen name="Carrito" component={CarritoScreens}/>
+            <Stack.Screen name="MyTab" component={MyTab}/>
         </Stack.Navigator>
+    )
+}
+
+const Tab = createBottomTabNavigator()
+
+function MyTab(){
+    return(
+        <Tab.Navigator>
+            <Tab.Screen name="Perfil" component={PerfilScreens}/>
+        </Tab.Navigator>
     )
 }
 

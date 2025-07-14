@@ -40,7 +40,7 @@ export default function CarritoScreens({ navigation }: any) {
 
     const finalizarCompra = () => {
         const total = calcularTotal();
-        Alert.alert("Compra finalizada", 'Total a pagar: $${total.toFixed(2)}');
+        Alert.alert("Compra finalizada", 'Total a pagar: ' + total.toFixed(2));
         setBloqueado(true); 
     };
 
@@ -70,7 +70,6 @@ export default function CarritoScreens({ navigation }: any) {
                     </View>
                 ))
             )}
-
             {productos.length > 0 && (
                 <View style={styles.resumen}>
                     <Text style={styles.totalText}>Total a pagar: ${calcularTotal().toFixed(2)}</Text>
