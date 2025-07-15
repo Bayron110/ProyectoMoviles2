@@ -11,43 +11,50 @@ import FacturaScreens from "../Screens/UsuarioVentanas/FacturaScreens";
 import CarritoScreens from "../Screens/UsuarioVentanas/CarritoScreens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import PerfilScreens from "../Screens/UsuarioVentanas/PerfilScreens";
+import HistorialCompra from "../Screens/UsuarioVentanas/HistorialCompra";
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 
-const Stack =  createStackNavigator()
+const Stack = createStackNavigator()
 
 function MyStack() {
     return (
-        <Stack.Navigator>
+        <SafeAreaView style={{ flex: 1 }}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={HomeScreens} />
-            <Stack.Screen name="IniciarS" component={IniciaeScreens}/>
-            <Stack.Screen name="Registro" component={RegistroScreens}/>
-            <Stack.Screen name="VentanaP" component={VentanaPScreens}/>
-            <Stack.Screen name="Chevrolet" component={Chevrolet}/>
-            <Stack.Screen name="Toyota" component={Toyota}/>
-            <Stack.Screen name="Huandawi" component={Huandawi}/>
-            <Stack.Screen name="Detalle" component={FacturaScreens}/>
-            <Stack.Screen name="Carrito" component={CarritoScreens}/>
-            <Stack.Screen name="MyTab" component={MyTab}/>
+            <Stack.Screen name="IniciarS" component={IniciaeScreens} />
+            <Stack.Screen name="Registro" component={RegistroScreens} />
+            <Stack.Screen name="VentanaP" component={VentanaPScreens} />
+            <Stack.Screen name="MyTab" component={MyTab} />
+            <Stack.Screen name="Chevrolet" component={Chevrolet} />
+            <Stack.Screen name="Toyota" component={Toyota} />
+            <Stack.Screen name="Huandawi" component={Huandawi} />
+            <Stack.Screen name="Detalle" component={FacturaScreens} />
+            <Stack.Screen name="Carrito" component={CarritoScreens} />
         </Stack.Navigator>
+        </SafeAreaView>
     )
 }
 
 const Tab = createBottomTabNavigator()
 
-function MyTab(){
-    return(
-        <Tab.Navigator>
-            <Tab.Screen name="Perfil" component={PerfilScreens}/>
+function MyTab() {
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
+            <Tab.Screen name="Perfil" component={PerfilScreens} />
+            <Tab.Screen name="Historial" component={HistorialCompra} />
         </Tab.Navigator>
+        </SafeAreaView>
     )
 }
 
 
 
-export default function NavegadorPrincipal(){
-    return(
+export default function NavegadorPrincipal() {
+    return (
         <NavigationContainer>
-            <MyStack/>
+            <MyStack />
         </NavigationContainer>
     )
 }

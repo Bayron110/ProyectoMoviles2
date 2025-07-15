@@ -1,13 +1,33 @@
-import { Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useState } from 'react';
+import { Alert, Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
+import { supabase } from '../supabase/Config';
 
 export default function IniciaeScreens({ navigation }: any) {
- 
 
-    
-    
-  
-  return (
-    <ImageBackground
+    const [correo, setcorreo] = useState("")
+    const [contrasena, setcontrasena] = useState("")
+
+    async function iniciar() {
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: correo,
+            password: contrasena,
+        })
+        console.log(data);
+        console.log(error);
+
+        if (data.user != null) {
+            navigation.navigate("VentanaP")
+        } else {
+            Alert.alert("No fue Posible el Inicio de Sesión", "Revise sus credenciales he intentelo de nuevo")
+        }
+
+
+    }
+
+
+    return (
+        <ImageBackground
             source={{ uri: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80' }}
             style={styles.background}
             blurRadius={3}
@@ -18,15 +38,17 @@ export default function IniciaeScreens({ navigation }: any) {
                     placeholder="Correo electrónico"
                     placeholderTextColor="#ddd"
                     style={styles.input}
+                    onChangeText={setcorreo}
                 />
                 <TextInput
                     placeholder="Contraseña"
                     placeholderTextColor="#ddd"
                     secureTextEntry
                     style={styles.input}
+                    onChangeText={setcontrasena}
                 />
-                <Button title="Iniciar sesión" onPress={()=>navigation.navigate("VentanaP")} color="#FF6600" />
-                <Button title="Registrase" onPress={()=>navigation.navigate("Registro")} color="#2ae5c2" />
+                <Button title="Iniciar sesión" onPress={() => iniciar()} color="#FF6600" />
+                <Button title="Registrase" onPress={() => navigation.navigate("Registro")} color="#2ae5c2" />
             </View>
         </ImageBackground>
     );
