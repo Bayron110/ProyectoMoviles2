@@ -38,10 +38,12 @@ export default function VentanaPScreens({ navigation }: any) {
                     <Image
                         source={require('../../assets/img/hyundai.png')}
                         style={styles.imghyundai}
-
                     />
                 </TouchableOpacity>
             </View>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('MyTab')}>
+                <Text style={styles.buttonText}>Ir a Mi Perfil</Text>
+            </TouchableOpacity>
         </ImageBackground>
     )
 }
@@ -52,21 +54,27 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     overlay: {
-        backgroundColor: 'rgba(255,255,255,0.85)',
+        backgroundColor: 'rgba(255,255,255,0.9)',
         padding: 20,
-        borderRadius: 10,
-        margin: 20,
+        borderRadius: 15,
+        marginHorizontal: 20,
+        marginVertical: 10,
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
     bienvenida: {
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#2d3436',
         marginBottom: 10,
         textAlign: 'center',
     },
     subtitulo: {
-        fontSize: 18,
+        fontSize: 16,
         color: '#555',
         textAlign: 'center',
         marginBottom: 20,
@@ -74,34 +82,37 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#6a994e',
         paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        marginTop: 12,
         width: '100%',
+        alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '600',
         textAlign: 'center',
     },
     imgChevrolet: {
-        width: 230,
-        height: 80,
+        width: 200,
+        height: 60,
         alignSelf: 'center',
-        marginTop: 8
-
+        marginTop: 8,
+        resizeMode: 'contain',
     },
     imgToyota: {
-        width: 150,
-        height: 100,
+        width: 160,
+        height: 80,
         alignSelf: 'center',
-        marginTop: 8
+        marginTop: 8,
+        resizeMode: 'contain',
     },
     imghyundai: {
-        width: 190,
-        height: 100,
+        width: 170,
+        height: 80,
         alignSelf: 'center',
-        marginTop: 8
+        marginTop: 8,
+        resizeMode: 'contain',
     }
-})
+});

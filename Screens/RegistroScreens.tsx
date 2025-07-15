@@ -1,6 +1,6 @@
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, ImageBackground, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, ImageBackground, ScrollView, Alert } from 'react-native'
 import { supabase } from '../supabase/Config'
+import { useState } from 'react'
 
 export default function RegistroScreens({ navigation }: any) {
   const [cedula, setcedula] = useState("")
@@ -11,10 +11,11 @@ export default function RegistroScreens({ navigation }: any) {
   const [dirreccion, setdirrecion] = useState("")
   const [contrasena, setcontrasena] = useState("")
 
-  async function registrar() {
+  async function registrar(uid: String) {
     const { error } = await supabase
       .from('Usuarios')
       .insert({
+        id: uid,
         cedula: cedula,
         nombre: nombre,
         apellido: apellido,
@@ -23,8 +24,36 @@ export default function RegistroScreens({ navigation }: any) {
         dirreccion: dirreccion,
         contrasena: contrasena
       })
-      
+
   }
+
+  async function guardar() {
+  const { data, error } = await supabase.auth.signUp({
+    email: correo,
+    password: contrasena,
+  })
+
+  //console.log(data.user?.id)
+  await registrar(data.user?.id as String)
+
+  //console.log(data)
+  //console.log(error)
+
+  if (correo !== "" && contrasena !== "") {
+    setcedula("")
+    setnombre("")
+    setapellido("")
+    setcorreo("")
+    setTelefono("")
+    setdirrecion("")
+    setcontrasena("")
+
+    navigation.navigate("Registro")
+  } else {
+    Alert.alert("Aviso", "No ha llenando todos los campos Solicitados")
+    return
+  }
+}
 
   return (
     <ImageBackground
@@ -39,40 +68,46 @@ export default function RegistroScreens({ navigation }: any) {
           style={styles.input}
           placeholder="Cedula"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setcedula(text)}
+          onChangeText={(text) => setcedula(text)}
+          value={cedula}
         />
         <TextInput
           style={styles.input}
           placeholder="Nombre"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setnombre(text)}
+          onChangeText={(text) => setnombre(text)}
+          value={nombre}
         />
         <TextInput
           style={styles.input}
           placeholder="Apellido"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setapellido(text)}
+          onChangeText={(text) => setapellido(text)}
+          value={apellido}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setcorreo(text)}
+          onChangeText={(text) => setcorreo(text)}
+          value={correo}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Teléfono"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setTelefono(text)}
+          onChangeText={(text) => setTelefono(text)}
+          value={Telefono}
         />
 
         <TextInput
           style={styles.input}
           placeholder="Dirección"
           placeholderTextColor="#999"
-          onChangeText={(text)=> setdirrecion(text)}
+          onChangeText={(text) => setdirrecion(text)}
+          value={dirreccion}
         />
 
         <TextInput
@@ -80,12 +115,13 @@ export default function RegistroScreens({ navigation }: any) {
           placeholder="Contraseña"
           secureTextEntry
           placeholderTextColor="#999"
-          onChangeText={(text)=> setcontrasena(text)}
+          onChangeText={(text) => setcontrasena(text)}
+          value={contrasena}
         />
 
-        <TouchableOpacity 
-        style={styles.button}
-        onPress={()=>registrar()} 
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => guardar()}
         >
           <Text style={styles.buttonText}>Registrarse</Text>
         </TouchableOpacity>
