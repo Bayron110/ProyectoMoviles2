@@ -13,8 +13,8 @@ export default function IniciaeScreens({ navigation }: any) {
             email: correo,
             password: contrasena,
         })
-        console.log(data);
-        console.log(error);
+        //console.log(data);
+        //console.log(error);
 
         if (data.user != null) {
             navigation.navigate("VentanaP")
