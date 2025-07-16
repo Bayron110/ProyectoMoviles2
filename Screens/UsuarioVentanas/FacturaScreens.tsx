@@ -11,59 +11,57 @@ export default function FacturaScreens({ route, navigation }: any) {
     const subtotal = item.precio * (parseInt(cantidad) || 0);
     const total = subtotal;
 
-    const confirmarCompra = () => {
-        if (!idPersonalizado || !cantidad || parseInt(cantidad) <= 0) {
-            Alert.alert("Error", "Completa el ID y la cantidad válida.");
-            return;
-        }
-        setModalVisible(true);
-    };
+    async function confirmarCompra(){
+    if (!cantidad || parseInt(cantidad) <= 0) {
+        Alert.alert("Error", "Ingresa una cantidad válida.");
+        return;
+    }
+    const nuevoId = await generarIdSiguiente();
+    if (!nuevoId) {
+        Alert.alert("Error", "No se pudo generar un ID.");
+        return;
+    }
+    setIdPersonalizado(nuevoId.toString());
+    setModalVisible(true);
+};
 
-    const pagarAhora = async () => {
-        const { error } = await supabase.from('Respuestos').insert([
-            {
-                id: parseInt(idPersonalizado),
-                Marca: item.marca,
-                Cantidad: parseInt(cantidad),
-                Total: total,
-                Estado: "Pendiente"
-            }
-        ]);
 
-        if (error) {
-            console.log("Error al guardar:", error.message);
-            Alert.alert("Error", "No se pudo guardar en la base de datos.");
-        } else {
-            Alert.alert("Éxito", "Compra registrada correctamente.");
-            setModalVisible(false);
-            navigation.navigate('Carrito');
-        }
-    };
+    async function pagarAhora (){
+    const nuevoId = await generarIdSiguiente();
+    if (!nuevoId || !cantidad || parseInt(cantidad) <= 0) {
+        Alert.alert("Error", "Completa la cantidad válida.");
+        return;
+    }
 
-    const guardarCarrito = async () => {
-        if (!idPersonalizado || !cantidad || parseInt(cantidad) <= 0) {
-            Alert.alert("Error", "Completa el ID y la cantidad válida.");
-            return;
-        }
+    const { error } = await supabase.from('Respuestos').insert([{
+        id: nuevoId,
+        Marca: item.marca,
+        Cantidad: parseInt(cantidad),
+        Total: total,
+        Estado: "Pendiente"
+    }]);
 
-        const { error } = await supabase.from('Respuestos').insert([
-            {
-                id: parseInt(idPersonalizado),
-                Marca: item.marca,
-                Cantidad: parseInt(cantidad),
-                Total: total,
-                Estado: "Pendiente"
-            }
-        ]);
-
-        if (error) {
-            console.log("Error al guardar:", error.message);
-            Alert.alert("Error", "No se pudo guardar en la base de datos.");
-        } else {
-            Alert.alert("Éxito", "Producto guardado en el carrito.");
-            navigation.navigate('Carrito');
-        }
-    };
+    if (error) {
+        Alert.alert("Error", "No se pudo guardar en la base de datos.");
+    } else {
+        Alert.alert("Éxito", "Compra registrada correctamente.");
+        setModalVisible(false);
+        navigation.navigate('Carrito');
+    }
+};
+    async function generarIdSiguiente () {
+    const { data, error } = await supabase
+        .from('Respuestos')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1);
+    if (error) {
+        console.log("Error al obtener el último ID:", error.message);
+        return null;
+    }
+    const ultimoId = data[0]?.id || 0;
+    return ultimoId + 1;
+};
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -72,16 +70,7 @@ export default function FacturaScreens({ route, navigation }: any) {
             <Text style={styles.text}>Marca: {item.marca}</Text>
             <Text style={styles.text}>Precio unitario: ${item.precio.toFixed(2)}</Text>
             <Text style={styles.text}>Stock disponible: {item.stock}</Text>
-
-            <Text style={styles.label}>ID personalizado</Text>
-            <TextInput
-                placeholder="Ej: 101"
-                value={idPersonalizado}
-                onChangeText={setIdPersonalizado}
-                style={styles.input}
-                keyboardType="numeric"
-            />
-
+            
             <Text style={styles.label}>Cantidad deseada</Text>
             <TextInput
                 placeholder="Ej: 2"
@@ -92,9 +81,9 @@ export default function FacturaScreens({ route, navigation }: any) {
             />
 
             <View style={styles.buttonGroup}>
-                <Button title="Guardar en el carrito" onPress={guardarCarrito} color="#2980B9" />
                 <View style={{ marginTop: 10 }}>
-                    <Button title="Pagar ahora" onPress={confirmarCompra} color="#27AE60" />
+                    <Button title="Agregar" onPress={confirmarCompra} color="#27AE60" />
+                    <Button title='Regresar' onPress={()=>  navigation.goBack()}/>
                 </View>
             </View>
 
@@ -113,7 +102,7 @@ export default function FacturaScreens({ route, navigation }: any) {
                         <View style={{ marginTop: 20 }}>
                             <Button title="Cancelar" onPress={() => setModalVisible(false)} color="#A93226" />
                             <View style={{ marginTop: 10 }}>
-                                <Button title="Pagar" onPress={pagarAhora} color="#27AE60" />
+                                <Button title="Agregar al Carrito" onPress={pagarAhora} color="#27AE60" />
                             </View>
                         </View>
                     </View>

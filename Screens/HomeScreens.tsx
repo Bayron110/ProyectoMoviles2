@@ -51,7 +51,7 @@ export default function HomeScreens({ navigation }: any) {
 
 
             <View style={styles.buttonContainer}>
-                <Button title="Ir a Login" onPress={() => navigation.navigate('IniciarS')} color="#FF6600" />
+                <Button title="Iniciar Sesión" onPress={() => navigation.navigate('IniciarS')} color="#FF6600" />
             </View>
         </ScrollView>
     );

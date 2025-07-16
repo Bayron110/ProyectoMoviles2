@@ -8,9 +8,29 @@ export default function CarritoScreens({ navigation }: any) {
 
     useEffect(() => {
         obtenerDatos();
-    }, []);
+    const canal = supabase
+        .channel('repuestos-realtime')
+        .on(
+            'postgres_changes',
+            {
+                event: '*', 
+                schema: 'public',
+                table: 'Respuestos'
+            },
+            (payload) => {
+                //console.log('Cambio detectado:', payload);
+                obtenerDatos();  
+            }
+        )
+        .subscribe();
 
-    const obtenerDatos = async () => {
+    return () => {
+        supabase.removeChannel(canal); 
+    };
+}, []);
+
+
+    async function obtenerDatos(){
         const { data, error } = await supabase.from('Respuestos').select('*');
         if (error) {
             console.log("Error al obtener datos:", error.message);
@@ -22,7 +42,7 @@ export default function CarritoScreens({ navigation }: any) {
         }
     };
 
-    const eliminarProducto = async (id: number) => {
+    async function eliminarProducto(id: number){
         if (bloqueado) return;
 
         const { error } = await supabase.from('Respuestos').delete().eq('id', id);
@@ -33,16 +53,93 @@ export default function CarritoScreens({ navigation }: any) {
             obtenerDatos();
         }
     };
+    function Activar () {
+    return productos.every(p => p.Estado === "Completado");
+};
 
-    const calcularTotal = () => {
+    function calcularTotal(){
         return productos.reduce((acc, item) => acc + parseFloat(item.Total || 0), 0);
     };
 
-    const finalizarCompra = () => {
-        const total = calcularTotal();
-        Alert.alert("Compra finalizada", 'Total a pagar: ' + total.toFixed(2));
-        setBloqueado(true); 
-    };
+    async function finalizarCompra() {
+    if (!Activar()) {
+        Alert.alert("Advertencia", "Todos los productos deben estar completados para finalizar la compra.");
+        return;
+    }
+
+    const historialData = productos.map((item) => ({
+        id: item.id,
+        Marca: item.Marca,
+        Cantidad: item.Cantidad,
+        Total: item.Total,
+        Estado: item.Estado,
+        Fecha: new Date().toISOString(),
+    }));
+
+    const { error: insertError } = await supabase
+        .from('Historial')
+        .insert(historialData);
+
+    if (insertError) {
+        console.log("Error insertando en historial:", insertError);
+        Alert.alert("Error", "No se pudo registrar el historial.");
+        return;
+    }
+
+    const ids = productos.map(p => p.id);
+    const { error: deleteError } = await supabase
+        .from('Respuestos')
+        .delete()
+        .in('id', ids);
+
+    if (deleteError) {
+        console.log("Error eliminando del carrito:", deleteError);
+        Alert.alert("Error", "No se pudo eliminar del carrito.");
+        return;
+    }
+
+    const total = calcularTotal();
+    Alert.alert("Compra finalizada", `Total pagado: $${total.toFixed(2)}`);
+    setBloqueado(true);
+    obtenerDatos();
+}
+
+
+
+async function historial(id: number) {
+    const { data, error: fetchError } = await supabase
+        .from('Respuestos')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (fetchError || !data) {
+        Alert.alert("Error", "No se pudo obtener el producto para pagar.");
+        return;
+    }
+    const { error: insertError } = await supabase
+        .from('Historial')
+        .insert([{
+            ...data,
+            Fecha: new Date().toISOString(), 
+        }]);
+
+    if (insertError) {
+        Alert.alert("Error", "No se pudo registrar el historial.");
+        return;
+    }
+    const { error: deleteError } = await supabase
+        .from('Respuestos')
+        .delete()
+        .eq('id', id);
+
+    if (deleteError) {
+        Alert.alert("Error", "No se pudo eliminar del carrito.");
+    } else {
+        Alert.alert("Compra registrada", "Se ha movido al historial exitosamente.");
+        obtenerDatos();
+    }
+}
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -61,10 +158,16 @@ export default function CarritoScreens({ navigation }: any) {
 
                         <View style={styles.cancel}>
                             <Button
+                                title="Pagar Ahora"
+                                onPress={() => historial(item.id)}
+                                color="#2ccc0f"
+                                disabled={bloqueado || item.Estado != "Completado"}
+                            />
+                            <Button
                                 title="Cancelar compra"
                                 onPress={() => eliminarProducto(item.id)}
                                 color="#C0392B"
-                                disabled={bloqueado}
+                                disabled={bloqueado || item.Estado !="Pendiente"}
                             />
                         </View>
                     </View>
@@ -77,6 +180,7 @@ export default function CarritoScreens({ navigation }: any) {
                         title="Finalizar compra"
                         onPress={finalizarCompra}
                         color="#27AE60"
+                        disabled={!Activar() || bloqueado}
                     />
                 </View>
             )}
