@@ -5,44 +5,56 @@ import { supabase } from '../../supabase/Config';
 export default function CarritoScreens({ navigation }: any) {
     const [productos, setProductos] = useState<any[]>([]);
     const [bloqueado, setBloqueado] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
-        obtenerDatos();
-    const canal = supabase
-        .channel('repuestos-realtime')
-        .on(
-            'postgres_changes',
-            {
-                event: '*', 
-                schema: 'public',
-                table: 'Respuestos'
-            },
-            (payload) => {
-                //console.log('Cambio detectado:', payload);
-                obtenerDatos();  
+        const obtenerUsuarioYDatos = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+                obtenerDatos(user.id);
+            } else {
+                Alert.alert("Error", "No se pudo obtener el usuario actual.");
             }
-        )
-        .subscribe();
+        };
 
-    return () => {
-        supabase.removeChannel(canal); 
-    };
-}, []);
+        obtenerUsuarioYDatos();
 
+        const canal = supabase
+            .channel('repuestos-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'Respuestos'
+                },
+                (payload) => {
+                    if (userId) obtenerDatos(userId);
+                }
+            )
+            .subscribe();
 
-    async function obtenerDatos(){
-        const { data, error } = await supabase.from('Respuestos').select('*');
+        return () => {
+            supabase.removeChannel(canal);
+        };
+    }, [userId]);
+
+    async function obtenerDatos(uid: string) {
+        const { data, error } = await supabase
+            .from('Respuestos')
+            .select('*')
+            .eq('user_id', uid);
+
         if (error) {
             console.log("Error al obtener datos:", error.message);
         } else {
             setProductos(data);
-            if (data.length > 0) {
-                setBloqueado(false); 
-            }
+            setBloqueado(false);
         }
-    };
+    }
 
-    async function eliminarProducto(id: number){
+    async function eliminarProducto(id: number) {
         if (bloqueado) return;
 
         const { error } = await supabase.from('Respuestos').delete().eq('id', id);
@@ -50,96 +62,98 @@ export default function CarritoScreens({ navigation }: any) {
             Alert.alert("Error", "No se pudo cancelar la compra.");
         } else {
             Alert.alert("Cancelado", "Producto eliminado del carrito.");
-            obtenerDatos();
+            if (userId) obtenerDatos(userId);
         }
-    };
-    function Activar () {
-    return productos.every(p => p.Estado === "Completado");
-};
+    }
 
-    function calcularTotal(){
+    function Activar() {
+        return productos.every(p => p.Estado === "Completado");
+    }
+
+    function calcularTotal() {
         return productos.reduce((acc, item) => acc + parseFloat(item.Total || 0), 0);
-    };
+    }
 
     async function finalizarCompra() {
-    if (!Activar()) {
-        Alert.alert("Advertencia", "Todos los productos deben estar completados para finalizar la compra.");
-        return;
+        if (!Activar()) {
+            Alert.alert("Advertencia", "Todos los productos deben estar completados para finalizar la compra.");
+            return;
+        }
+
+        const historialData = productos.map((item) => ({
+            id: item.id,
+            Marca: item.Marca,
+            Cantidad: item.Cantidad,
+            Total: item.Total,
+            Estado: item.Estado,
+            Fecha: new Date().toISOString(),
+            user_id: item.user_id
+        }));
+
+        const { error: insertError } = await supabase
+            .from('Historial')
+            .insert(historialData);
+
+        if (insertError) {
+            console.log("Error insertando en historial:", insertError);
+            Alert.alert("Error", "No se pudo registrar el historial.");
+            return;
+        }
+
+        const ids = productos.map(p => p.id);
+        const { error: deleteError } = await supabase
+            .from('Respuestos')
+            .delete()
+            .in('id', ids);
+
+        if (deleteError) {
+            console.log("Error eliminando del carrito:", deleteError);
+            Alert.alert("Error", "No se pudo eliminar del carrito.");
+            return;
+        }
+
+        const total = calcularTotal();
+        Alert.alert("Compra finalizada", `Total pagado: $${total.toFixed(2)}`);
+        setBloqueado(true);
+        if (userId) obtenerDatos(userId);
     }
 
-    const historialData = productos.map((item) => ({
-        id: item.id,
-        Marca: item.Marca,
-        Cantidad: item.Cantidad,
-        Total: item.Total,
-        Estado: item.Estado,
-        Fecha: new Date().toISOString(),
-    }));
+    async function historial(id: number) {
+        const { data, error: fetchError } = await supabase
+            .from('Respuestos')
+            .select('*')
+            .eq('id', id)
+            .single();
 
-    const { error: insertError } = await supabase
-        .from('Historial')
-        .insert(historialData);
+        if (fetchError || !data) {
+            Alert.alert("Error", "No se pudo obtener el producto para pagar.");
+            return;
+        }
 
-    if (insertError) {
-        console.log("Error insertando en historial:", insertError);
-        Alert.alert("Error", "No se pudo registrar el historial.");
-        return;
+        const { error: insertError } = await supabase
+            .from('Historial')
+            .insert([{
+                ...data,
+                Fecha: new Date().toISOString(),
+            }]);
+
+        if (insertError) {
+            Alert.alert("Error", "No se pudo registrar el historial.");
+            return;
+        }
+
+        const { error: deleteError } = await supabase
+            .from('Respuestos')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) {
+            Alert.alert("Error", "No se pudo eliminar del carrito.");
+        } else {
+            Alert.alert("Compra registrada", "Se ha movido al historial exitosamente.");
+            if (userId) obtenerDatos(userId);
+        }
     }
-
-    const ids = productos.map(p => p.id);
-    const { error: deleteError } = await supabase
-        .from('Respuestos')
-        .delete()
-        .in('id', ids);
-
-    if (deleteError) {
-        console.log("Error eliminando del carrito:", deleteError);
-        Alert.alert("Error", "No se pudo eliminar del carrito.");
-        return;
-    }
-
-    const total = calcularTotal();
-    Alert.alert("Compra finalizada", `Total pagado: $${total.toFixed(2)}`);
-    setBloqueado(true);
-    obtenerDatos();
-}
-
-
-
-async function historial(id: number) {
-    const { data, error: fetchError } = await supabase
-        .from('Respuestos')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-    if (fetchError || !data) {
-        Alert.alert("Error", "No se pudo obtener el producto para pagar.");
-        return;
-    }
-    const { error: insertError } = await supabase
-        .from('Historial')
-        .insert([{
-            ...data,
-            Fecha: new Date().toISOString(), 
-        }]);
-
-    if (insertError) {
-        Alert.alert("Error", "No se pudo registrar el historial.");
-        return;
-    }
-    const { error: deleteError } = await supabase
-        .from('Respuestos')
-        .delete()
-        .eq('id', id);
-
-    if (deleteError) {
-        Alert.alert("Error", "No se pudo eliminar del carrito.");
-    } else {
-        Alert.alert("Compra registrada", "Se ha movido al historial exitosamente.");
-        obtenerDatos();
-    }
-}
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -150,7 +164,7 @@ async function historial(id: number) {
             ) : (
                 productos.map((item: any, index: number) => (
                     <View key={index} style={styles.card}>
-                        <Text style={styles.name}>🧾 Producto: {item.id}</Text>
+                        <Text style={styles.name}>📟 Producto: {item.id}</Text>
                         <Text style={styles.text}>Marca: {item.Marca}</Text>
                         <Text style={styles.text}>Cantidad: {item.Cantidad}</Text>
                         <Text style={styles.text}>Total: ${parseFloat(item.Total).toFixed(2)}</Text>
@@ -161,13 +175,13 @@ async function historial(id: number) {
                                 title="Pagar Ahora"
                                 onPress={() => historial(item.id)}
                                 color="#2ccc0f"
-                                disabled={bloqueado || item.Estado != "Completado"}
+                                disabled={bloqueado || item.Estado !== "Completado"}
                             />
                             <Button
                                 title="Cancelar compra"
                                 onPress={() => eliminarProducto(item.id)}
                                 color="#C0392B"
-                                disabled={bloqueado || item.Estado !="Pendiente"}
+                                disabled={bloqueado || item.Estado !== "Pendiente"}
                             />
                         </View>
                     </View>
@@ -263,5 +277,5 @@ const styles = StyleSheet.create({
         color: '#666',
         marginTop: 40,
         fontStyle: 'italic',
-    },
+    },
 });
