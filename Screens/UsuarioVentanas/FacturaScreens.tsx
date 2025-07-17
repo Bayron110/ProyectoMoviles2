@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, Image, TextInput, Button, ScrollView, Modal, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, Button, ScrollView, Modal, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { supabase } from '../../supabase/Config';
 
@@ -12,68 +12,87 @@ export default function FacturaScreens({ route, navigation }: any) {
     const subtotal = item.precio * (parseInt(cantidad) || 0);
     const total = subtotal;
 
-    async function confirmarCompra(){
-    if (!cantidad || parseInt(cantidad) <= 0) {
-        Alert.alert("Error", "Ingresa una cantidad válida.");
-        return;
+    async function confirmarCompra() {
+        if (!cantidad || parseInt(cantidad) <= 0) {
+            Alert.alert("Error", "Ingresa una cantidad válida.");
+            return;
+        }
+        const nuevoId = await generarIdSiguiente();
+        if (!nuevoId) {
+            Alert.alert("Error", "No se pudo generar un ID.");
+            return;
+        }
+        setIdPersonalizado(nuevoId.toString());
+        setModalVisible(true);
+    };
+
+
+    async function pagarAhora() {
+        const nuevoId = await generarIdSiguiente();
+
+        if (!nuevoId || !cantidad || parseInt(cantidad) <= 0) {
+            Alert.alert("Error", "Completa la cantidad válida.");
+            return;
+        }
+
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData?.user) {
+            Alert.alert("Error", "No se pudo obtener el usuario autenticado.");
+            return;
+        }
+
+        const userId = userData.user.id;
+
+        const { error } = await supabase.from('Respuestos').insert([{
+            id: nuevoId,
+            Marca: item.marca,
+            Cantidad: parseInt(cantidad),
+            Total: total,
+            Estado: "Pendiente",
+            user_id: userId
+        }]);
+
+        if (error) {
+            Alert.alert("Error", "No se pudo guardar en la base de datos.");
+            console.log(error);
+
+        } else {
+            Alert.alert("Éxito", "Compra registrada correctamente.");
+            setModalVisible(false);
+            navigation.navigate('Carrito');
+        }
+    };
+
+    async function generarIdSiguiente() {
+        const { data: historialData, error: historialError } = await supabase
+            .from('Historial')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1);
+
+        if (historialError) {
+            console.log("Error al obtener el último ID de Historial:", historialError.message);
+            return null;
+        }
+
+        const ultimoHistorialId = historialData[0]?.id || 0;
+
+        const { data: repuestosData, error: repuestosError } = await supabase
+            .from('Respuestos')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1);
+
+        if (repuestosError) {
+            console.log("Error al obtener el último ID de Respuestos:", repuestosError.message);
+            return null;
+        }
+
+        const ultimoRepuestosId = repuestosData[0]?.id || 0;
+
+        const nuevoId = Math.max(ultimoHistorialId, ultimoRepuestosId) + 1;
+        return nuevoId;
     }
-    const nuevoId = await generarIdSiguiente();
-    if (!nuevoId) {
-        Alert.alert("Error", "No se pudo generar un ID.");
-        return;
-    }
-    setIdPersonalizado(nuevoId.toString());
-    setModalVisible(true);
-};
-
-
-  async function pagarAhora() {
-    const nuevoId = await generarIdSiguiente();
-
-    if (!nuevoId || !cantidad || parseInt(cantidad) <= 0) {
-        Alert.alert("Error", "Completa la cantidad válida.");
-        return;
-    }
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData?.user) {
-        Alert.alert("Error", "No se pudo obtener el usuario autenticado.");
-        return;
-    }
-
-    const userId = userData.user.id;
-
-    const { error } = await supabase.from('Respuestos').insert([{
-        id: nuevoId,
-        Marca: item.marca,
-        Cantidad: parseInt(cantidad),
-        Total: total,
-        Estado: "Pendiente",
-        user_id: userId // 💥 Aquí lo asociamos con el usuario actual
-    }]);
-
-    if (error) {
-        Alert.alert("Error", "No se pudo guardar en la base de datos.");
-    } else {
-        Alert.alert("Éxito", "Compra registrada correctamente.");
-        setModalVisible(false);
-        navigation.navigate('Carrito');
-    }
-};
-
-    async function generarIdSiguiente () {
-    const { data, error } = await supabase
-        .from('Historial')
-        .select('id')
-        .order('id', { ascending: false })
-        .limit(1);
-    if (error) {
-        console.log("Error al obtener el último ID:", error.message);
-        return null;
-    }
-    const ultimoId = data[0]?.id || 0;
-    return ultimoId + 1;
-};
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -82,7 +101,7 @@ export default function FacturaScreens({ route, navigation }: any) {
             <Text style={styles.text}>Marca: {item.marca}</Text>
             <Text style={styles.text}>Precio unitario: ${item.precio.toFixed(2)}</Text>
             <Text style={styles.text}>Stock disponible: {item.stock}</Text>
-            
+
             <Text style={styles.label}>Cantidad deseada</Text>
             <TextInput
                 placeholder="Ej: 2"
@@ -95,7 +114,7 @@ export default function FacturaScreens({ route, navigation }: any) {
             <View style={styles.buttonGroup}>
                 <View style={{ marginTop: 10 }}>
                     <Button title="Agregar" onPress={confirmarCompra} color="#27AE60" />
-                    <Button title='Regresar' onPress={()=>  navigation.goBack()}/>
+                    <Button title='Regresar' onPress={() => navigation.goBack()} />
                 </View>
             </View>
 
@@ -125,37 +144,38 @@ export default function FacturaScreens({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        padding: 20, 
-        backgroundColor: '#fff' 
+    container: {
+        padding: 20,
+        backgroundColor: '#fff'
     },
-    image: { 
-        height: 200, 
-        borderRadius: 10, 
-        marginBottom: 20 
+    image: {
+        height: 200,
+        borderRadius: 10,
+        marginBottom: 20
     },
-    title: { 
-        fontSize: 24, 
-        fontWeight: 'bold', 
-        marginBottom: 10, 
-        textAlign: 'center', 
-        color: '#FF6600' 
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center',
+        color: '#FF6600'
     },
-    text: { 
-        fontSize: 16, 
-        marginBottom: 5, 
-        color: '#333' 
+    text: {
+        fontSize: 16,
+        marginBottom: 5,
+        color: '#333'
     },
-    label: { 
-        fontSize: 16, 
-        marginTop: 15, 
-        marginBottom: 5, 
-        fontWeight: 'bold', 
-        color: '#444' 
+    label: {
+        fontSize: 16,
+        marginTop: 15,
+        marginBottom: 5,
+        fontWeight: 'bold',
+        color: '#444'
     },
-    input: { 
-        borderWidth: 1, 
-        borderColor: '#ccc', padding: 10, borderRadius: 8, marginBottom: 20, color: '#333' },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc', padding: 10, borderRadius: 8, marginBottom: 20, color: '#333'
+    },
     buttonGroup: { marginTop: 10 },
     modalContainer: {
         flex: 1,
