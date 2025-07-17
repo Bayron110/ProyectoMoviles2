@@ -15,6 +15,7 @@ import HistorialCompra from "../Screens/UsuarioVentanas/HistorialCompra";
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
+import MapaScreens from "../Screens/UsuarioVentanas/MapaScreens";
 
 
 const Stack = createStackNavigator()
@@ -69,6 +70,7 @@ function MyTab() {
             >
                 <Tab.Screen name="Perfil" component={PerfilScreens} />
                 <Tab.Screen name="Historial" component={HistorialCompra} />
+                <Tab.Screen name="Mapas" component={MapaScreens}/>
             </Tab.Navigator>
         </SafeAreaView>
     );

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, Button } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../supabase/Config';
@@ -31,7 +31,6 @@ export default function PerfilScreens({ navigation }: any) {
     obtenerPerfil();
   }, []);
 
-  // Función para seleccionar imagen
   const elegirImagen = async () => {
     const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permiso.status !== 'granted') {
@@ -87,6 +86,7 @@ export default function PerfilScreens({ navigation }: any) {
       >
         <Text style={styles.buttonText}>Cerrar Sesión</Text>
       </TouchableOpacity>
+      <Button title='Regresar' onPress={()=>  navigation.goBack()}/>
     </View>
   );
 }

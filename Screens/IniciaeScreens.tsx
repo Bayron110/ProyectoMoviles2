@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Alert, Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
 import { supabase } from '../supabase/Config';
+import * as Haptics from 'expo-haptics';
+
 
 export default function IniciaeScreens({ navigation }: any) {
 
@@ -8,21 +10,19 @@ export default function IniciaeScreens({ navigation }: any) {
     const [contrasena, setcontrasena] = useState("")
 
     async function iniciar() {
-
         const { data, error } = await supabase.auth.signInWithPassword({
             email: correo,
             password: contrasena,
-        })
-        //console.log(data);
-        //console.log(error);
-
+        });
         if (data.user != null) {
-            navigation.navigate("VentanaP")
+            navigation.navigate("VentanaP");
         } else {
-            Alert.alert("No fue Posible el Inicio de Sesión", "Revise sus credenciales he intentelo de nuevo")
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            Alert.alert(
+                "No fue posible el inicio de sesión",
+                "Revisa tus credenciales e inténtalo de nuevo"
+            );
         }
-
-
     }
 
 

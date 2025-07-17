@@ -2,6 +2,7 @@ import {StyleSheet, Text, View, Image, TextInput, Button, ScrollView, Modal, Ale
 import React, { useState } from 'react';
 import { supabase } from '../../supabase/Config';
 
+
 export default function FacturaScreens({ route, navigation }: any) {
     const { item } = route.params;
     const [idPersonalizado, setIdPersonalizado] = useState('');
@@ -26,19 +27,29 @@ export default function FacturaScreens({ route, navigation }: any) {
 };
 
 
-    async function pagarAhora (){
+  async function pagarAhora() {
     const nuevoId = await generarIdSiguiente();
+
     if (!nuevoId || !cantidad || parseInt(cantidad) <= 0) {
         Alert.alert("Error", "Completa la cantidad válida.");
         return;
     }
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+        Alert.alert("Error", "No se pudo obtener el usuario autenticado.");
+        return;
+    }
+
+    const userId = userData.user.id;
 
     const { error } = await supabase.from('Respuestos').insert([{
         id: nuevoId,
         Marca: item.marca,
         Cantidad: parseInt(cantidad),
         Total: total,
-        Estado: "Pendiente"
+        Estado: "Pendiente",
+        user_id: userId // 💥 Aquí lo asociamos con el usuario actual
     }]);
 
     if (error) {
@@ -49,9 +60,10 @@ export default function FacturaScreens({ route, navigation }: any) {
         navigation.navigate('Carrito');
     }
 };
+
     async function generarIdSiguiente () {
     const { data, error } = await supabase
-        .from('Respuestos')
+        .from('Historial')
         .select('id')
         .order('id', { ascending: false })
         .limit(1);
@@ -113,12 +125,37 @@ export default function FacturaScreens({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: '#fff' },
-    image: { height: 200, borderRadius: 10, marginBottom: 20 },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, textAlign: 'center', color: '#FF6600' },
-    text: { fontSize: 16, marginBottom: 5, color: '#333' },
-    label: { fontSize: 16, marginTop: 15, marginBottom: 5, fontWeight: 'bold', color: '#444' },
-    input: { borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 8, marginBottom: 20, color: '#333' },
+    container: { 
+        padding: 20, 
+        backgroundColor: '#fff' 
+    },
+    image: { 
+        height: 200, 
+        borderRadius: 10, 
+        marginBottom: 20 
+    },
+    title: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        marginBottom: 10, 
+        textAlign: 'center', 
+        color: '#FF6600' 
+    },
+    text: { 
+        fontSize: 16, 
+        marginBottom: 5, 
+        color: '#333' 
+    },
+    label: { 
+        fontSize: 16, 
+        marginTop: 15, 
+        marginBottom: 5, 
+        fontWeight: 'bold', 
+        color: '#444' 
+    },
+    input: { 
+        borderWidth: 1, 
+        borderColor: '#ccc', padding: 10, borderRadius: 8, marginBottom: 20, color: '#333' },
     buttonGroup: { marginTop: 10 },
     modalContainer: {
         flex: 1,

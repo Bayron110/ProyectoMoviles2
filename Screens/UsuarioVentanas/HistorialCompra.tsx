@@ -1,27 +1,47 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabase/Config';
 
 export default function HistorialCompra() {
-  const [historial, setHistorial] = useState<Historial[]>([]);
+    const [historial, setHistorial] = useState<Historial[]>([]);
+    const [userId, setUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    cargarHistorial();
-  }, []);
+    useEffect(() => {
+        const cargarUsuarioYHistorial = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+                cargarHistorial(user.id);
+            } else {
+                Alert.alert("Error", "No se pudo obtener el usuario actual.");
+            }
+        };
 
-  async function cargarHistorial() {
-    const { data, error } = await supabase.from('Historial').select('*');
-    if (!error) setHistorial(data);
-  }
+        cargarUsuarioYHistorial();
+    }, []);
 
-  interface Historial {
-    id: number;
-    Marca: string;
-    Cantidad: string;
-    Total: string;
-    Estado: string;
-    Fecha: string;
-  }
+    async function cargarHistorial(uid: string) {
+        const { data, error } = await supabase
+            .from('Historial')
+            .select('*')
+            .eq('user_id', uid);
+
+        if (error) {
+            console.log("Error al cargar historial:", error.message);
+            Alert.alert("Error", "No se pudo obtener el historial de compras.");
+        } else {
+            setHistorial(data);
+        }
+    }
+
+    interface Historial {
+        id: number;
+        Marca: string;
+        Cantidad: string;
+        Total: string;
+        Estado: string;
+        Fecha: string;
+    }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
