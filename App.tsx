@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import NavegadorPrincipal from './navigation/MainNavigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context'; // 👈 import necesario
 
 export default function App() {
   return (
-    <NavegadorPrincipal/>
-
+    <SafeAreaProvider> {/* 👈 envolver aquí */}
+      <NavegadorPrincipal />
+    </SafeAreaProvider>
   );
 }
 
@@ -16,7 +18,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  txt:{
+  txt: {
     fontSize: 30
   }
 });
