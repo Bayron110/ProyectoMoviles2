@@ -12,13 +12,12 @@ import CarritoScreens from "../Screens/UsuarioVentanas/CarritoScreens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import PerfilScreens from "../Screens/UsuarioVentanas/PerfilScreens";
 import HistorialCompra from "../Screens/UsuarioVentanas/HistorialCompra";
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import MapaScreens from "../Screens/UsuarioVentanas/MapaScreens";
 
-
-const Stack = createStackNavigator()
+const Stack = createStackNavigator();
 
 function MyStack() {
     return (
@@ -36,10 +35,10 @@ function MyStack() {
                 <Stack.Screen name="Carrito" component={CarritoScreens} />
             </Stack.Navigator>
         </SafeAreaView>
-    )
+    );
 }
 
-const Tab = createBottomTabNavigator()
+const Tab = createBottomTabNavigator();
 
 function MyTab() {
     return (
@@ -62,6 +61,8 @@ function MyTab() {
                             iconName = 'person-circle-outline';
                         } else if (route.name === 'Historial') {
                             iconName = 'document-text-outline';
+                        } else if (route.name === 'Mapas') {
+                            iconName = 'map-outline'; // 🗺️ Ícono para Mapas
                         }
 
                         return <Ionicons name={iconName as any} size={26} color={color} />;
@@ -70,18 +71,16 @@ function MyTab() {
             >
                 <Tab.Screen name="Perfil" component={PerfilScreens} />
                 <Tab.Screen name="Historial" component={HistorialCompra} />
-                <Tab.Screen name="Mapas" component={MapaScreens}/>
+                <Tab.Screen name="Mapas" component={MapaScreens} />
             </Tab.Navigator>
         </SafeAreaView>
     );
 }
-
-
 
 export default function NavegadorPrincipal() {
     return (
         <NavigationContainer>
             <MyStack />
         </NavigationContainer>
-    )
+    );
 }

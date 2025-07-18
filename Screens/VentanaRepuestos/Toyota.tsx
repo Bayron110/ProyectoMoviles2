@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ScrollView, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React from 'react';
 import repuestos from '../../Json/Respuestos.json';
 
@@ -7,11 +7,11 @@ const toyotaRepuestos = repuestos.Toyota;
 export default function Toyota({ navigation }: any) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.companyTitle}>Repuestos Toyota</Text>
+      <Text style={styles.companyTitle}>🚗 Repuestos Toyota</Text>
 
       <Image
         source={{ uri: 'https://www.bing.com/th/id/OIP.37-Uhk1ch79Cum4zTZn40gHaE7?w=254&h=211&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' }}
-        style={styles.image}
+        style={styles.bannerImage}
       />
 
       <Text style={styles.title}>¿Qué ofrecemos?</Text>
@@ -33,31 +33,30 @@ export default function Toyota({ navigation }: any) {
           <Text style={styles.cardTitle}>{item.nombre}</Text>
           <Text style={styles.cardText}>{item.descripcion}</Text>
           <Text style={styles.cardText}>Marca: {item.marca}</Text>
-          <Text style={styles.cardText}>
-            💰 ${item.precio.toFixed(2)} | Stock: {item.stock}
-          </Text>
+          <Text style={styles.cardText}>💰 ${item.precio.toFixed(2)} | Stock: {item.stock}</Text>
 
-          <View style={{ marginTop: 10 }}>
-            <Button
-              title="Comprar"
-              color="#FF6600"
-              onPress={() => navigation.navigate('Detalle', { item })}
-            />
-          </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Detalle', { item })}
+          >
+            <Text style={styles.buttonText}>Comprar</Text>
+          </TouchableOpacity>
         </View>
       ))}
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Volver al Inicio"
+      <View style={styles.navigationButtons}>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('VentanaP')}
-          color="#FF6600"
-        />
-        <Button
-          title="Ver el Carrito"
+        >
+          <Text style={styles.buttonText}>Volver al Inicio</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('Carrito')}
-          color="#FF6600"
-        />
+        >
+          <Text style={styles.buttonText}>Ir al Carrito</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -75,10 +74,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 25,
   },
-  image: {
-    height: 200,
-    borderRadius: 10,
+  bannerImage: {
+    height: 240,
+    width: '100%',
+    borderRadius: 15,
     marginBottom: 20,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 24,
@@ -93,6 +94,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     color: '#444',
+    borderBottomWidth: 2,
+    borderBottomColor: '#FF6600',
+    paddingBottom: 5,
   },
   text: {
     fontSize: 16,
@@ -104,17 +108,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fdfdfd',
     borderRadius: 10,
     padding: 15,
-    marginBottom: 20,
-    elevation: 2,
+    marginBottom: 25,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowRadius: 3,
   },
   cardImage: {
-    height: 160,
-    borderRadius: 8,
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
     marginBottom: 10,
+    resizeMode: 'cover',
+    backgroundColor: '#eee',
   },
   cardTitle: {
     fontSize: 18,
@@ -123,14 +130,25 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   cardText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  buttonContainer: {
+  button: {
+    backgroundColor: '#FF6600',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  navigationButtons: {
     marginTop: 30,
-    marginBottom: 40,
-    alignSelf: 'center',
-    width: '60%',
+    gap: 15,
   },
 });

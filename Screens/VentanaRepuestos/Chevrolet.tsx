@@ -1,5 +1,4 @@
-// screens/Chevrolet.tsx
-import { StyleSheet, Text, View, Image, ScrollView, Button } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import React from 'react';
 import repuestos from '../../Json/Respuestos.json';
 
@@ -8,11 +7,11 @@ const chevroletRepuestos = repuestos.Chevrolet;
 export default function Chevrolet({ navigation }: any) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.companyTitle}>Repuestos Chevrolet</Text>
+      <Text style={styles.companyTitle}>🚗 Repuestos Chevrolet</Text>
 
       <Image
         source={{ uri: 'https://grupocondor.com.py/wp-content/uploads/2022/07/Repuestos-para-auto-y-camiones-Paraguay-Grupo-Condor.jpg' }}
-        style={styles.image}
+        style={styles.bannerImage}
       />
 
       <Text style={styles.title}>¿Qué ofrecemos?</Text>
@@ -35,27 +34,28 @@ export default function Chevrolet({ navigation }: any) {
           <Text style={styles.cardText}>{item.descripcion}</Text>
           <Text style={styles.cardText}>Marca: {item.marca}</Text>
           <Text style={styles.cardText}>💰 ${item.precio.toFixed(2)} | Stock: {item.stock}</Text>
-          <View style={{ marginTop: 10 }}>
-            <Button
-              title="Comprar"
-              color="#FF6600"
-              onPress={() => navigation.navigate('Detalle', { item })}
-            />
-          </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('Detalle', { item })}
+          >
+            <Text style={styles.buttonText}>Comprar</Text>
+          </TouchableOpacity>
         </View>
       ))}
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Volver al Inicio"
+      <View style={styles.navigationButtons}>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('VentanaP')}
-          color="#FF6600"
-        />
-        <Button
-          title="Volver el Carrito"
+        >
+          <Text style={styles.buttonText}>Volver al Inicio</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => navigation.navigate('Carrito')}
-          color="#FF6600"
-        />
+        >
+          <Text style={styles.buttonText}>Ir al Carrito</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -69,15 +69,16 @@ const styles = StyleSheet.create({
   companyTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#D35400',
+    color: '#FF6600',
     textAlign: 'center',
     marginBottom: 20,
   },
-  image: {
-    height: 220,
+  bannerImage: {
+    height: 240,
     width: '100%',
     borderRadius: 15,
     marginBottom: 20,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 22,
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 15,
-    marginBottom: 20,
+    marginBottom: 25,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -114,14 +115,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardImage: {
-  width: '100%',
-  height: 180,
-  borderRadius: 10,
-  marginBottom: 10,
-  resizeMode: 'cover',
-  backgroundColor: '#eee',
-},
-
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: 'cover',
+    backgroundColor: '#eee',
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -133,10 +133,21 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
   },
-  buttonContainer: {
+  button: {
+    backgroundColor: '#FF6600',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  navigationButtons: {
     marginTop: 30,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
+    gap: 15,
   },
 });

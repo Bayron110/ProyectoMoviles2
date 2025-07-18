@@ -1,30 +1,60 @@
-import { useState } from 'react';
-import { Alert, Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useState, useEffect } from 'react';
+import { Alert, Button, ImageBackground, StyleSheet, Text, TextInput, View } from 'react-native';
 import { supabase } from '../supabase/Config';
 import * as Haptics from 'expo-haptics';
-
+import { Audio } from 'expo-av';
 
 export default function IniciaeScreens({ navigation }: any) {
+    const [correo, setcorreo] = useState('');
+    const [contrasena, setcontrasena] = useState('');
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-    const [correo, setcorreo] = useState("")
-    const [contrasena, setcontrasena] = useState("")
+    // Liberar sonido cuando el componente se desmonta
+    useEffect(() => {
+        return sound
+            ? () => {
+                sound.unloadAsync();
+            }
+            : undefined;
+    }, [sound]);
+
+    async function reproducirExito() {
+        const { sound } = await Audio.Sound.createAsync(
+            require('../assets/sounds/exito.mp3')
+        );
+        setSound(sound);
+        await sound.playAsync();
+    }
+
+    async function reproducirError() {
+        const { sound } = await Audio.Sound.createAsync(
+            require('../assets/sounds/error.mp3.mp3')
+        );
+        setSound(sound);
+        await sound.playAsync();
+    }
 
     async function iniciar() {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data } = await supabase.auth.signInWithPassword({
             email: correo,
             password: contrasena,
         });
+
         if (data.user != null) {
+            await reproducirExito();
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             navigation.navigate("VentanaP");
         } else {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            await reproducirError(); 
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
             Alert.alert(
-                "No fue posible el inicio de sesión",
+                "Error de inicio de sesión",
                 "Revisa tus credenciales e inténtalo de nuevo"
             );
         }
     }
-
 
     return (
         <ImageBackground
@@ -39,6 +69,7 @@ export default function IniciaeScreens({ navigation }: any) {
                     placeholderTextColor="#ddd"
                     style={styles.input}
                     onChangeText={setcorreo}
+                    value={correo}
                 />
                 <TextInput
                     placeholder="Contraseña"
@@ -46,14 +77,14 @@ export default function IniciaeScreens({ navigation }: any) {
                     secureTextEntry
                     style={styles.input}
                     onChangeText={setcontrasena}
+                    value={contrasena}
                 />
-                <Button title="Iniciar sesión" onPress={() => iniciar()} color="#FF6600" />
-                <Button title="Registrase" onPress={() => navigation.navigate("Registro")} color="#2ae5c2" />
+                <Button title="Iniciar sesión" onPress={iniciar} color="#FF6600" />
+                <Button title="Registrarse" onPress={() => navigation.navigate("Registro")} color="#2ae5c2" />
             </View>
         </ImageBackground>
     );
 }
-
 
 const styles = StyleSheet.create({
     background: {
